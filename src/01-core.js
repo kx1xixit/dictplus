@@ -595,8 +595,8 @@ class DictionariesPlus {
 
     if (OP === 'sum') return nums.reduce((a, b) => a + b, 0);
     if (OP === 'average') return nums.reduce((a, b) => a + b, 0) / nums.length;
-    if (OP === 'min') return Math.min(...nums);
-    if (OP === 'max') return Math.max(...nums);
+    if (OP === 'min') return nums.reduce((a, b) => Math.min(a, b), nums[0]);
+    if (OP === 'max') return nums.reduce((a, b) => Math.max(a, b), nums[0]);
     return 0;
   }
 
