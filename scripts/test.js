@@ -24,6 +24,17 @@ globalThis.Scratch = {
       registeredExtension = ext;
     },
   },
+  translate: str => str,
+  BlockType: {
+    REPORTER: 'reporter',
+    COMMAND: 'command',
+    BOOLEAN: 'boolean',
+  },
+  ArgumentType: {
+    STRING: 'string',
+    NUMBER: 'number',
+    BOOLEAN: 'boolean',
+  },
 };
 
 require(BUILD_FILE);
