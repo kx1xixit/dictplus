@@ -650,7 +650,10 @@ class DictionariesPlus {
   }
 
   dict_manage_key({ KEY, DICT, ACTION, VAL }) {
-    if (!dictionaries.has(DICT)) dictionaries.set(DICT, KEY === '' && ACTION === 'push' ? [] : {});
+    if (!dictionaries.has(DICT)) {
+      if (ACTION === 'delete') return;
+      dictionaries.set(DICT, KEY === '' && ACTION === 'push' ? [] : {});
+    }
     const root = dictionaries.get(DICT);
 
     if (KEY === '') {
