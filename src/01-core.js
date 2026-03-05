@@ -81,9 +81,14 @@ const resolvePath = (root, pathString, autoCreate = false) => {
 
   if (typeof current !== 'object' || current === null) return null;
 
+  const finalKey = parts[parts.length - 1];
+  if (finalKey === '__proto__' || finalKey === 'constructor' || finalKey === 'prototype') {
+    return null;
+  }
+
   return {
     target: current,
-    key: parts[parts.length - 1],
+    key: finalKey,
   };
 };
 
@@ -128,7 +133,7 @@ const deepFindPath = (obj, target, currentPath = '') => {
 
         const newPath = currentPath ? `${currentPath}.${key}` : key;
         const found = deepFindPath(obj[key], target, newPath);
-        if (found) return found;
+        if (found !== '') return found;
       }
     }
   }
@@ -635,7 +640,7 @@ class DictionariesPlus {
     if (!loc || loc.target === null) return false;
     const val = loc.target[loc.key];
 
-    if (CHECK === 'is defined') return loc.key in loc.target;
+    if (CHECK === 'is defined') return Object.prototype.hasOwnProperty.call(loc.target, loc.key);
     if (CHECK === 'is null') return val === null;
     if (CHECK === 'is array') return Array.isArray(val);
     if (CHECK === 'is dictionary (object)') return isPlainObject(val);
