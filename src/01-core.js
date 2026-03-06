@@ -7,6 +7,8 @@ if (Scratch.vm && Scratch.vm.runtime) {
   });
 }
 
+const isDangerousKey = key => key === '__proto__' || key === 'constructor' || key === 'prototype';
+
 const sanitize = obj => {
   if (!obj || typeof obj !== 'object') return obj;
 
@@ -18,7 +20,7 @@ const sanitize = obj => {
   }
 
   for (const key of Object.keys(obj)) {
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+    if (isDangerousKey(key)) {
       delete obj[key];
     } else {
       obj[key] = sanitize(obj[key]);
@@ -59,7 +61,7 @@ const resolvePath = (root, pathString, autoCreate = false) => {
   for (let i = 0; i < parts.length - 1; i++) {
     const part = parts[i];
 
-    if (part === '__proto__' || part === 'constructor' || part === 'prototype') {
+    if (isDangerousKey(part)) {
       return null;
     }
 
@@ -82,7 +84,7 @@ const resolvePath = (root, pathString, autoCreate = false) => {
   if (typeof current !== 'object' || current === null) return null;
 
   const finalKey = parts[parts.length - 1];
-  if (finalKey === '__proto__' || finalKey === 'constructor' || finalKey === 'prototype') {
+  if (isDangerousKey(finalKey)) {
     return null;
   }
 
@@ -94,7 +96,7 @@ const resolvePath = (root, pathString, autoCreate = false) => {
 
 const deepMerge = (target, source) => {
   for (const key of Object.keys(source)) {
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+    if (isDangerousKey(key)) continue;
 
     if (isPlainObject(source[key]) && isPlainObject(target[key])) {
       deepMerge(target[key], source[key]);
@@ -129,7 +131,7 @@ const deepFindPath = (obj, target, currentPath = '') => {
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         // Skip internal props
-        if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+        if (isDangerousKey(key)) continue;
 
         const newPath = currentPath ? `${currentPath}.${key}` : key;
         const found = deepFindPath(obj[key], target, newPath);
@@ -143,7 +145,7 @@ const deepFindPath = (obj, target, currentPath = '') => {
 const flattenObject = (obj, prefix = '', res = {}) => {
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+      if (isDangerousKey(key)) continue;
 
       const val = obj[key];
       const newKey = prefix ? `${prefix}.${key}` : key;
@@ -648,7 +650,10 @@ class DictionariesPlus {
   }
 
   dict_manage_key({ KEY, DICT, ACTION, VAL }) {
-    if (!dictionaries.has(DICT)) dictionaries.set(DICT, {});
+    if (!dictionaries.has(DICT)) {
+      if (ACTION === 'delete') return;
+      dictionaries.set(DICT, KEY === '' && ACTION === 'push' ? [] : {});
+    }
     const root = dictionaries.get(DICT);
 
     if (KEY === '') {
