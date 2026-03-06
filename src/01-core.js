@@ -159,6 +159,17 @@ const flattenObject = (obj, prefix = '', res = {}) => {
   return res;
 };
 
+const getArrayForKey = (DICT, KEY) => {
+  if (!dictionaries.has(DICT)) return null;
+  const root = dictionaries.get(DICT);
+  if (KEY === '') {
+    return Array.isArray(root) ? root : null;
+  }
+  const loc = resolvePath(root, KEY);
+  if (!loc || !Array.isArray(loc.target[loc.key])) return null;
+  return loc.target[loc.key];
+};
+
 class DictionariesPlus {
   getInfo() {
     return {
@@ -901,17 +912,8 @@ class DictionariesPlus {
   }
 
   array_get_item({ INDEX, KEY, DICT }) {
-    if (!dictionaries.has(DICT)) return 'undefined';
-    const root = dictionaries.get(DICT);
-
-    let arr = root;
-    if (KEY !== '') {
-      const loc = resolvePath(root, KEY);
-      if (!loc || !Array.isArray(loc.target[loc.key])) return 'undefined';
-      arr = loc.target[loc.key];
-    }
-
-    if (!Array.isArray(arr)) return 'undefined';
+    const arr = getArrayForKey(DICT, KEY);
+    if (arr === null) return 'undefined';
 
     const idx = Math.trunc(Number(INDEX));
     if (isNaN(idx) || idx < 0 || idx >= arr.length) return 'undefined';
@@ -919,17 +921,8 @@ class DictionariesPlus {
   }
 
   array_set_item({ INDEX, KEY, DICT, VAL }) {
-    if (!dictionaries.has(DICT)) return;
-    const root = dictionaries.get(DICT);
-
-    let arr = root;
-    if (KEY !== '') {
-      const loc = resolvePath(root, KEY);
-      if (!loc || !Array.isArray(loc.target[loc.key])) return;
-      arr = loc.target[loc.key];
-    }
-
-    if (!Array.isArray(arr)) return;
+    const arr = getArrayForKey(DICT, KEY);
+    if (arr === null) return;
 
     const idx = Math.trunc(Number(INDEX));
     if (isNaN(idx) || idx < 0 || idx >= arr.length) return;
@@ -937,17 +930,8 @@ class DictionariesPlus {
   }
 
   array_insert_item({ VAL, INDEX, KEY, DICT }) {
-    if (!dictionaries.has(DICT)) return;
-    const root = dictionaries.get(DICT);
-
-    let arr = root;
-    if (KEY !== '') {
-      const loc = resolvePath(root, KEY);
-      if (!loc || !Array.isArray(loc.target[loc.key])) return;
-      arr = loc.target[loc.key];
-    }
-
-    if (!Array.isArray(arr)) return;
+    const arr = getArrayForKey(DICT, KEY);
+    if (arr === null) return;
 
     const idx = Math.trunc(Number(INDEX));
     if (isNaN(idx) || idx < 0) return;
@@ -955,17 +939,8 @@ class DictionariesPlus {
   }
 
   array_remove_item({ INDEX, KEY, DICT }) {
-    if (!dictionaries.has(DICT)) return;
-    const root = dictionaries.get(DICT);
-
-    let arr = root;
-    if (KEY !== '') {
-      const loc = resolvePath(root, KEY);
-      if (!loc || !Array.isArray(loc.target[loc.key])) return;
-      arr = loc.target[loc.key];
-    }
-
-    if (!Array.isArray(arr)) return;
+    const arr = getArrayForKey(DICT, KEY);
+    if (arr === null) return;
 
     const idx = Math.trunc(Number(INDEX));
     if (isNaN(idx) || idx < 0 || idx >= arr.length) return;
@@ -973,17 +948,8 @@ class DictionariesPlus {
   }
 
   array_join({ KEY, DICT, SEP }) {
-    if (!dictionaries.has(DICT)) return '';
-    const root = dictionaries.get(DICT);
-
-    let arr = root;
-    if (KEY !== '') {
-      const loc = resolvePath(root, KEY);
-      if (!loc || !Array.isArray(loc.target[loc.key])) return '';
-      arr = loc.target[loc.key];
-    }
-
-    if (!Array.isArray(arr)) return '';
+    const arr = getArrayForKey(DICT, KEY);
+    if (arr === null) return '';
     return arr
       .map(item => (typeof item === 'object' ? JSON.stringify(item) : String(item)))
       .join(SEP);
