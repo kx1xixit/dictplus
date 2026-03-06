@@ -311,7 +311,7 @@ jobs:
               per_page: 100,
             });
 
-            const botComments = comments.filter(c => c.user?.login === 'github-actions[bot]' && c.body.includes(marker));
+            const botComments = comments.filter(c => c.user?.login === 'github-actions[bot]' && c.body?.includes(marker));
             const existing = botComments[botComments.length - 1];
             if (existing) {
               await github.rest.issues.updateComment({
