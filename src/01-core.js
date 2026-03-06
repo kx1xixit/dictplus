@@ -412,6 +412,79 @@ class DictionariesPlus {
             DICT: { type: Scratch.ArgumentType.STRING, defaultValue: 'foo' },
           },
         },
+
+        '---',
+        // Array Operations
+        {
+          opcode: 'array_init',
+          blockType: Scratch.BlockType.COMMAND,
+          text: Scratch.translate('initialize [DICT] as empty array'),
+          arguments: {
+            DICT: { type: Scratch.ArgumentType.STRING, defaultValue: 'myArray' },
+          },
+        },
+        {
+          opcode: 'array_push',
+          blockType: Scratch.BlockType.COMMAND,
+          text: Scratch.translate('push [VAL] to array [KEY] in [DICT]'),
+          arguments: {
+            VAL: { type: Scratch.ArgumentType.STRING, defaultValue: 'item' },
+            KEY: { type: Scratch.ArgumentType.STRING, defaultValue: '' },
+            DICT: { type: Scratch.ArgumentType.STRING, defaultValue: 'myArray' },
+          },
+        },
+        {
+          opcode: 'array_get_item',
+          blockType: Scratch.BlockType.REPORTER,
+          text: Scratch.translate('item [INDEX] of array [KEY] in [DICT]'),
+          arguments: {
+            INDEX: { type: Scratch.ArgumentType.NUMBER, defaultValue: 0 },
+            KEY: { type: Scratch.ArgumentType.STRING, defaultValue: '' },
+            DICT: { type: Scratch.ArgumentType.STRING, defaultValue: 'myArray' },
+          },
+        },
+        {
+          opcode: 'array_set_item',
+          blockType: Scratch.BlockType.COMMAND,
+          text: Scratch.translate('replace item [INDEX] of array [KEY] in [DICT] with [VAL]'),
+          arguments: {
+            INDEX: { type: Scratch.ArgumentType.NUMBER, defaultValue: 0 },
+            KEY: { type: Scratch.ArgumentType.STRING, defaultValue: '' },
+            DICT: { type: Scratch.ArgumentType.STRING, defaultValue: 'myArray' },
+            VAL: { type: Scratch.ArgumentType.STRING, defaultValue: 'item' },
+          },
+        },
+        {
+          opcode: 'array_insert_item',
+          blockType: Scratch.BlockType.COMMAND,
+          text: Scratch.translate('insert [VAL] at [INDEX] in array [KEY] in [DICT]'),
+          arguments: {
+            VAL: { type: Scratch.ArgumentType.STRING, defaultValue: 'item' },
+            INDEX: { type: Scratch.ArgumentType.NUMBER, defaultValue: 0 },
+            KEY: { type: Scratch.ArgumentType.STRING, defaultValue: '' },
+            DICT: { type: Scratch.ArgumentType.STRING, defaultValue: 'myArray' },
+          },
+        },
+        {
+          opcode: 'array_remove_item',
+          blockType: Scratch.BlockType.COMMAND,
+          text: Scratch.translate('delete item [INDEX] from array [KEY] in [DICT]'),
+          arguments: {
+            INDEX: { type: Scratch.ArgumentType.NUMBER, defaultValue: 0 },
+            KEY: { type: Scratch.ArgumentType.STRING, defaultValue: '' },
+            DICT: { type: Scratch.ArgumentType.STRING, defaultValue: 'myArray' },
+          },
+        },
+        {
+          opcode: 'array_join',
+          blockType: Scratch.BlockType.REPORTER,
+          text: Scratch.translate('items of array [KEY] in [DICT] joined by [SEP]'),
+          arguments: {
+            KEY: { type: Scratch.ArgumentType.STRING, defaultValue: '' },
+            DICT: { type: Scratch.ArgumentType.STRING, defaultValue: 'myArray' },
+            SEP: { type: Scratch.ArgumentType.STRING, defaultValue: ', ' },
+          },
+        },
       ],
       menus: {
         check_menu: {
@@ -793,6 +866,127 @@ class DictionariesPlus {
         console.warn('Dictionaries+: Merge (overwrite) failed', e);
       }
     }
+  }
+
+  // --- Array Operation Methods ---
+
+  array_init({ DICT }) {
+    dictionaries.set(DICT, []);
+  }
+
+  array_push({ VAL, KEY, DICT }) {
+    if (!dictionaries.has(DICT)) {
+      dictionaries.set(DICT, KEY === '' ? [] : {});
+    }
+    const root = dictionaries.get(DICT);
+
+    if (KEY === '') {
+      if (Array.isArray(root)) {
+        root.push(tryParse(VAL));
+      }
+      return;
+    }
+
+    const loc = resolvePath(root, KEY, true);
+    if (!loc) return;
+
+    let arr = loc.target[loc.key];
+    if (arr === undefined) {
+      loc.target[loc.key] = [];
+      arr = loc.target[loc.key];
+    }
+    if (Array.isArray(arr)) {
+      arr.push(tryParse(VAL));
+    }
+  }
+
+  array_get_item({ INDEX, KEY, DICT }) {
+    if (!dictionaries.has(DICT)) return 'undefined';
+    const root = dictionaries.get(DICT);
+
+    let arr = root;
+    if (KEY !== '') {
+      const loc = resolvePath(root, KEY);
+      if (!loc || !Array.isArray(loc.target[loc.key])) return 'undefined';
+      arr = loc.target[loc.key];
+    }
+
+    if (!Array.isArray(arr)) return 'undefined';
+
+    const idx = Math.trunc(Number(INDEX));
+    if (isNaN(idx) || idx < 0 || idx >= arr.length) return 'undefined';
+    return formatOutput(arr[idx]);
+  }
+
+  array_set_item({ INDEX, KEY, DICT, VAL }) {
+    if (!dictionaries.has(DICT)) return;
+    const root = dictionaries.get(DICT);
+
+    let arr = root;
+    if (KEY !== '') {
+      const loc = resolvePath(root, KEY);
+      if (!loc || !Array.isArray(loc.target[loc.key])) return;
+      arr = loc.target[loc.key];
+    }
+
+    if (!Array.isArray(arr)) return;
+
+    const idx = Math.trunc(Number(INDEX));
+    if (isNaN(idx) || idx < 0 || idx >= arr.length) return;
+    arr[idx] = tryParse(VAL);
+  }
+
+  array_insert_item({ VAL, INDEX, KEY, DICT }) {
+    if (!dictionaries.has(DICT)) return;
+    const root = dictionaries.get(DICT);
+
+    let arr = root;
+    if (KEY !== '') {
+      const loc = resolvePath(root, KEY);
+      if (!loc || !Array.isArray(loc.target[loc.key])) return;
+      arr = loc.target[loc.key];
+    }
+
+    if (!Array.isArray(arr)) return;
+
+    const idx = Math.trunc(Number(INDEX));
+    if (isNaN(idx) || idx < 0) return;
+    arr.splice(Math.min(idx, arr.length), 0, tryParse(VAL));
+  }
+
+  array_remove_item({ INDEX, KEY, DICT }) {
+    if (!dictionaries.has(DICT)) return;
+    const root = dictionaries.get(DICT);
+
+    let arr = root;
+    if (KEY !== '') {
+      const loc = resolvePath(root, KEY);
+      if (!loc || !Array.isArray(loc.target[loc.key])) return;
+      arr = loc.target[loc.key];
+    }
+
+    if (!Array.isArray(arr)) return;
+
+    const idx = Math.trunc(Number(INDEX));
+    if (isNaN(idx) || idx < 0 || idx >= arr.length) return;
+    arr.splice(idx, 1);
+  }
+
+  array_join({ KEY, DICT, SEP }) {
+    if (!dictionaries.has(DICT)) return '';
+    const root = dictionaries.get(DICT);
+
+    let arr = root;
+    if (KEY !== '') {
+      const loc = resolvePath(root, KEY);
+      if (!loc || !Array.isArray(loc.target[loc.key])) return '';
+      arr = loc.target[loc.key];
+    }
+
+    if (!Array.isArray(arr)) return '';
+    return arr
+      .map(item => (typeof item === 'object' ? JSON.stringify(item) : String(item)))
+      .join(SEP);
   }
 }
 
