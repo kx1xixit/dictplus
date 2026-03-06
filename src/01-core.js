@@ -887,7 +887,8 @@ class DictionariesPlus {
 
   array_push({ VAL, KEY, DICT }) {
     if (!dictionaries.has(DICT)) {
-      dictionaries.set(DICT, KEY === '' ? [] : {});
+      const firstSeg = KEY.split('.')[0];
+      dictionaries.set(DICT, KEY === '' || /^\d/.test(firstSeg) ? [] : {});
     }
     const root = dictionaries.get(DICT);
 

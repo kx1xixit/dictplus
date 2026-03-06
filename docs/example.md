@@ -48,6 +48,14 @@ To push to a nested array inside a dictionary, supply the key path:
 push [42] to array [scores] in [foo]
 ```
 
+When the dictionary itself is a root-level array (e.g. `[{"scores": []}]`), use an index-prefixed path to address a field inside an element. The leading number is the element index:
+
+```text
+push [42] to array [0.scores] in [myArray]
+```
+
+The `0` selects the first element of the root array, and `scores` is the nested array inside it.
+
 #### Read an item by index (0-based)
 
 ```text
