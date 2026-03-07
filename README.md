@@ -1,239 +1,141 @@
-# TurboWarp Extension Template
+# Dictionaries+
 
-A template repository for creating **TurboWarp/Scratch extensions** with CI/CD workflows and automated builds.
+**Dictionaries+** is a TurboWarp/Scratch extension that brings the power of JSON to your projects. Store and manipulate structured data — nested objects, arrays, and more — directly inside your Scratch sprites using a rich set of blocks.
 
 ## Features
 
-- **Modular Architecture**: Organize your extension code into separate files
-- **Automated Build System**: Combines multiple JS files from `/src/` into a single extension bundle
-- **CI/CD Workflows**: GitHub Actions for building, testing, and releasing
-- **Watch Mode**: Development mode with automatic rebuilding on file changes
-- **Linting & Formatting**: ESLint and Prettier pre-configured
-- **Release Automation**: Automatic release creation with build artifacts
-- **Scratch Extension Format**: Ready for TurboWarp or Scratch 3.0+ environments
+- **Dictionary Management**: Create, clone, merge, clear, and delete named dictionaries
+- **Dot-Notation Key Paths**: Access deeply nested values with paths like `player.stats.hp`
+- **Array Operations**: Push, insert, replace, delete, and join items in arrays stored inside dictionaries
+- **Advanced Queries**: Filter arrays, aggregate numeric fields (sum/average/min/max), search for values, and find key paths
+- **JSON Import/Export**: Load raw JSON into a dictionary; stringify or export as Base64
+- **Type Inspection**: Check whether a value is an object, array, null, or a primitive
+- **Prototype-Pollution Guard**: Dangerous keys (`__proto__`, `constructor`, `prototype`) are blocked at every access point
+
+## Blocks Overview
+
+### Reporters
+
+| Block | Description |
+|---|---|
+| `list of dictionaries` | JSON array of all dictionary names |
+| `stringify dictionary [DICT] into JSON` | Serialize a dictionary to a JSON string |
+| `key [KEY] from dictionary [DICT]` | Read a value at a dot-notation path |
+| `keys of path [KEY] in dictionary [DICT]` | List the keys of a nested object |
+| `length of [KEY] in [DICT]` | Length of an array/string/object |
+| `type of [KEY] in [DICT]` | `"object"`, `"array"`, `"string"`, `"number"`, etc. |
+| `path to first [VAL] in [DICT]` | Dot-notation path to the first occurrence of a value |
+| `filter array [KEY] in [DICT] where [SUBKEY] [OP] [VAL]` | Filter array of objects by a field comparison |
+| `get [OP] of [KEY] in [DICT]` | Aggregate: sum / average / min / max |
+| `flatten dictionary [DICT] to JSON` | Flatten nested keys to a single-level JSON object |
+| `export dictionary [DICT] as Base64` | Base64-encode the JSON representation |
+| `item [INDEX] of array [KEY] in [DICT]` | Get an array item by 0-based index |
+| `items of array [KEY] in [DICT] joined by [SEP]` | Join all array items into a string |
+
+### Booleans
+
+| Block | Description |
+|---|---|
+| `is value [VAL] mentioned anywhere in [DICT]?` | Deep search for a value |
+| `key [KEY] in [DICT] [CHECK]?` | Check: is defined / is null / is array / is dictionary (object) |
+
+### Commands
+
+| Block | Description |
+|---|---|
+| `key [KEY] in [DICT]: [ACTION] [VAL]` | set to / change by / push / delete a key |
+| `dictionary [DICT]: [ACTION] [DATA]` | load JSON / clear / delete a dictionary |
+| `clone dictionary [SRC] as [DEST]` | Deep-copy a dictionary under a new name |
+| `merge dictionary [SRC] into [DEST]` | Deep-merge one dictionary into another |
+| `initialize [DICT] as empty array` | Reset/create a dictionary as an empty array |
+| `push [VAL] to array [KEY] in [DICT]` | Append a value to an array |
+| `replace item [INDEX] of array [KEY] in [DICT] with [VAL]` | Replace an item at a 0-based index |
+| `insert [VAL] at [INDEX] in array [KEY] in [DICT]` | Insert before a given index |
+| `delete item [INDEX] from array [KEY] in [DICT]` | Remove an item by index |
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ or 20+
-- npm or yarn
+- Node.js 20+ (tested on 20.x and 22.x)
+- npm
 - TurboWarp or Scratch 3.0+ environment
 
 ### Installation
 
-1. Clone this repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+```bash
+git clone https://github.com/kx1xixit/dictplus.git
+cd dictplus
+npm install
+```
 
-### Development
-
-#### Build the extension
+### Build
 
 ```bash
 npm run build
 ```
 
-This creates `build/extension.js` by combining all `.js` files from `src/`.
+This creates `build/extension.js`.
 
-#### Watch mode (automatic rebuild on file changes)
+### Load in TurboWarp
 
-```bash
-npm run watch
-```
+1. Go to [turbowarp.org](https://turbowarp.org)
+2. Click **Add Extension** → **Load Custom Extension**
+3. Upload `build/extension.js`, or host it and paste its URL
 
-#### Lint your code
+## Development
 
-```bash
-npm run lint
-```
-
-#### Format code
-
-```bash
-npm run format
-```
+| Command | Description |
+|---|---|
+| `npm run build` | Build once |
+| `npm run watch` | Rebuild automatically on file changes |
+| `npm run lint` | Check for code errors |
+| `npm run format` | Auto-format code |
+| `npm test` | Run automated tests |
+| `npm run validate` | Validate the build output |
+| `npm run fullstack` | Format + lint + spell-check + validate + build |
 
 ## Project Structure
 
-```
-├── src/
-│   ├── manifest.json          # Extension metadata
-│   ├── 01-core.js             # Main extension class
-│   ├── 02-example-module.js   # Example helper code
-│   └── [other modules].js     # Add more modules here
-├── build/
-│   └── extension.js           # Generated output file
-├── scripts/
-│   └── build.js               # Build script
-└── Configuration files
-```
+```text
+src/
+├── 01-core.js      ← All extension logic
+└── manifest.json   ← Extension metadata (name, id, version, …)
 
-## How It Works
+build/
+└── extension.js    ← Generated output (do not edit)
 
-### File Loading Order
+scripts/
+└── build.js        ← Build script
 
-Files in `src/` are loaded in **alphabetical order** by the build script. Use numbered prefixes to control load order:
-
-- `01-core.js` - Main extension class (loaded first, must have `getInfo()` and block methods)
-- `02-helpers.js` - Helper functions and utilities
-- `03-utils.js` - Additional utilities
-- etc.
-
-### Extension Structure
-
-The generated `extension.js` includes:
-
-1. **Extension Header**: Generated from `src/manifest.json`
-2. **IIFE Wrapper**: `(function (Scratch) { ... })(Scratch)`
-3. **All Source Files**: Concatenated in alphabetical order
-4. **Extension Registration**: `Scratch.extensions.register(new YourExtension())`
-
-### Creating Blocks
-
-Add blocks to your extension's `getInfo()` method:
-
-```javascript
-class MyExtension {
-  getInfo() {
-    return {
-      id: 'myExtension',
-      name: 'My Extension',
-      color1: '#4CAF50',
-      blocks: [
-        {
-          opcode: 'myBlock',
-          blockType: 'reporter',
-          text: 'my block',
-        },
-      ],
-    };
-  }
-
-  myBlock() {
-    return 'Hello!';
-  }
-}
+docs/
+└── example.md      ← Usage examples
 ```
 
-## Configuration
+## Usage Examples
 
-### manifest.json
+See [docs/example.md](docs/example.md) for detailed examples covering:
 
-Customize your extension metadata in `src/manifest.json`:
+- Basic dictionary read/write
+- Nested key paths with dot notation
+- Array operations (push, insert, filter, join)
+- Combining arrays and objects
+- Tips and edge cases
 
-```json
-{
-  "name": "My Extension",
-  "id": "myExtension",
-  "version": "1.0.0",
-  "description": "What does my extension do?",
-  "author": "Your Name",
-  "license": "MIT"
-}
+## Releases
+
+A GitHub Actions workflow automatically builds and publishes a release when a version tag is pushed:
+
+```bash
+# Update version in src/manifest.json, then:
+git tag v1.1.0
+git push origin v1.1.0
 ```
-
-The metadata is automatically inserted into the extension header:
-
-```javascript
-// Name: My Extension
-// ID: myExtension
-// Description: What does my extension do?
-// By: Your Name
-// license: MIT
-// Version 1.0.0
-```
-
-### ESLint & Prettier
-
-Edit `eslint.config.mjs` and `.prettierrc.json` to customize linting and formatting rules.
-
-## CI/CD Workflows
-
-### Build Workflow (`.github/workflows/ci.yml`)
-
-Automatically builds the extension on:
-
-- Push to `main`, `develop`, or `master` branches
-- Pull requests to these branches
-- Tests against Node.js 18.x and 20.x
-
-Artifacts are uploaded and available for download.
-
-### Release Workflow (`.github/workflows/cd.yml`)
-
-Automatically builds and releases the extension when you:
-
-1. Create a git tag: `git tag v1.0.0`
-2. Push the tag: `git push origin v1.0.0`
-
-The workflow will:
-
-- Build the extension
-- Create a GitHub release
-- Upload `build/extension.js` as a release asset
-
-## Installation in TurboWarp
-
-1. Build the extension: `npm run build`
-2. Go to [TurboWarp](https://turbowarp.org)
-3. Click "Add Extension" → "Load Custom Extension"
-4. Paste the URL or upload `build/extension.js` file
-5. The extension blocks will appear in the editor
-
-### For Local Testing
-
-To test locally during development, you can use a fork of TurboWarp that loads extensions from a local server:
-
-1. Build: `npm run build`
-2. Start a local HTTP server
-3. Load from `http://localhost:PORT/build/extension.js`
-
-## Tips
-
-- **Development**: Use `npm run watch` while developing to automatically rebuild on changes
-- **Testing**: Load the extension in TurboWarp's "Load Custom Extension" dialog
-- **Versioning**: Update `version` in `src/manifest.json` when releasing new versions
-- **Block Colors**: Use hex colors in `getInfo()` for `color1`, `color2`, `color3`
-- **Block Types**: Use `'reporter'`, `'command'`, `'boolean'`, `'hat'`, or `'conditional'`
-
-## Troubleshooting
-
-### Extension doesn't load
-
-- Check browser console for error messages
-- Verify the extension ID is unique
-- Ensure syntax is valid: run `npm run lint`
-
-### Changes not reflected
-
-- Run `npm run build` to rebuild if not in watch mode
-- Hard refresh TurboWarp (Ctrl+Shift+R)
-- For block changes: reload extension via "Load Custom Extension"
-
-### Build errors
-
-- Check that all `.js` files in `src/` have valid JavaScript syntax
-- Run `npm run lint` to find potential issues
-- Ensure manifest.json is valid JSON
-
-## Example Extensions
-
-This template includes example code. To see it in action:
-
-1. Run `npm run build`
-2. Load `build/extension.js` into TurboWarp
-3. Look for "My Extension" in the extensions menu
-4. Use the example blocks
-
-## License
-
-MIT
 
 ## Contributing
 
-Feel free to use this template as a starting point for your own TurboWarp/Scratch extensions!
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-For questions or improvements, open an issue or pull request.
+## License
+
+See [LICENSE](LICENSE) for licensing details.
