@@ -1,329 +1,84 @@
-# Contributing to Your TurboWarp Extension
+# Contributing to Dictionaries+
 
-This guide explains how to add features and blocks to your TurboWarp extension.
+Thank you for your interest in contributing to **Dictionaries+**!
 
-## Adding Your First Block
+## Getting Started
 
-### 1. Define the Block in `getInfo()`
+1. Fork the repository on GitHub, then clone your fork:
 
-Edit `src/01-core.js` and add a block definition to the `getInfo()` method:
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/dictplus.git
+   cd dictplus
+   npm install
+   ```
 
-```javascript
-getInfo() {
-  return {
-    id: 'myExtension',
-    name: 'My Extension',
-    color1: '#4CAF50',
-    blocks: [
-      {
-        opcode: 'sayHello',
-        blockType: 'reporter',
-        text: 'say [TEXT]',
-        arguments: {
-          TEXT: {
-            type: 'string',
-            defaultValue: 'hello',
-          },
-        },
-      },
-    ],
-  };
-}
-```
+2. Create a feature branch:
 
-### 2. Implement the Block Method
+   ```bash
+   git checkout -b feature/my-improvement
+   ```
 
-Add the method to your extension class:
+3. Make your changes to `src/01-core.js` and/or documentation.
 
-```javascript
-sayHello(args) {
-  return `Saying: ${args.TEXT}`;
-}
-```
+4. Build and validate:
 
-### 3. Build and Test
+   ```bash
+   npm run fullstack
+   ```
 
-```bash
-npm run build
-```
+5. Run the test suite:
 
-Load the extension in TurboWarp and test the new block!
+   ```bash
+   npm test
+   ```
 
-## Block Types
+6. Open a pull request against `main`.
 
-Scratch/TurboWarp supports different block types:
+## Code Style
 
-- `'reporter'` - Returns a value (green)
-- `'command'` - Performs an action (blue)
-- `'boolean'` - Returns true/false (pink)
-- `'hat'` - Event block (red, caps)
-- `'conditional'` - Conditional block (orange)
+- All source code lives in `src/01-core.js`.
+- Use ESLint and Prettier (already configured). Run `npm run format` before committing.
+- Avoid mutating the prototype chain. Dangerous keys (`__proto__`, `constructor`, `prototype`) **must** remain blocked via `isDangerousKey`.
+- New helper functions should follow the existing pattern of pure, named `const` functions defined before the `DictionariesPlus` class.
 
-Example:
+## Adding a New Block
 
-```javascript
-{
-  opcode: 'isGreaterThan',
-  blockType: 'boolean',
-  text: '[A] > [B]?',
-  arguments: {
-    A: { type: 'number', defaultValue: 5 },
-    B: { type: 'number', defaultValue: 10 },
-  },
-}
-```
-
-## Block Arguments
-
-Scratch supports multiple argument types:
-
-### Strings
-
-```javascript
-TEXT: {
-  type: 'string',
-  defaultValue: 'hello',
-}
-```
-
-### Numbers
-
-```javascript
-COUNT: {
-  type: 'number',
-  defaultValue: 1,
-}
-```
-
-### Booleans
-
-```javascript
-ENABLED: {
-  type: 'boolean',
-  defaultValue: true,
-}
-```
-
-### Dropdowns (Menus)
-
-```javascript
-COLOR: {
-  type: 'string',
-  menu: 'colors',  // Reference to a menu defined below
-  defaultValue: 'red',
-}
-```
-
-Then define the menu:
-
-```javascript
-menus: {
-  colors: ['red', 'green', 'blue'];
-}
-```
-
-## Helper Files
-
-Organize your code across multiple files for better maintainability:
-
-- `src/01-core.js` - Main extension class with `getInfo()` and block methods
-- `src/02-helpers.js` - Utility functions
-- `src/03-constants.js` - Constants and configuration
-- etc.
-
-Files load in alphabetical order, so you can reference helpers in your core class.
-
-## Code Quality
-
-### Run the linter
-
-```bash
-npm run lint
-```
-
-### Format your code
-
-```bash
-npm run format
-```
-
-### Fix linting errors
-
-```bash
-npm run lint -- --fix
-```
-
-## Extension Properties
-
-### Color Scheme
-
-Set colors for your extension blocks:
-
-```javascript
-getInfo() {
-  return {
-    color1: '#4CAF50',   // Primary color (menu icon)
-    color2: '#45a049',   // Secondary color (top of block)
-    color3: '#3d8b40',   // Tertiary color (block shadow)
-    ...
-  };
-}
-```
-
-Common colors:
-
-- `#4CAF50` - Green
-- `#0066CC` - Blue
-- `#CC5500` - Orange
-- `#E02040` - Red
-
-### Icons
-
-Add custom icons (optional):
-
-```javascript
-getInfo() {
-  return {
-    menuIconURI: 'data:image/svg+xml;...',   // Menu icon (36x36)
-    blockIconURI: 'data:image/svg+xml;...',  // Block icon (20x20)
-    ...
-  };
-}
-```
-
-## Best Practices
-
-### 1. Use Meaningful Names
-
-```javascript
-// Good
-{
-  opcode: 'moveForward',
-  text: 'move forward [STEPS] steps',
-  arguments: {
-    STEPS: { type: 'number', defaultValue: 10 }
-  }
-}
-
-// Bad
-{
-  opcode: 'go',
-  text: 'go [X]',
-  arguments: {
-    X: { type: 'number', defaultValue: 10 }
-  }
-}
-```
-
-### 2. Handle Errors Gracefully
-
-```javascript
-myBlock(args) {
-  try {
-    const value = Number(args.VALUE) || 0;
-    return value * 2;
-  } catch (err) {
-    console.error('[MyExtension] Error:', err);
-    return 0;
-  }
-}
-```
-
-### 3. Use Type Casting
-
-Scratch automatically converts arguments, but be explicit:
-
-```javascript
-myBlock(args) {
-  const number = Number(args.NUM);
-  const text = String(args.STR);
-  const bool = Boolean(args.BOOL);
-  return `${text}: ${number}`;
-}
-```
-
-### 4. Document Your Blocks
-
-Add comments explaining complex blocks:
-
-```javascript
-/**
- * Calculate distance between two points
- * Uses the Pythagorean theorem
- */
-distance(args) {
-  const x1 = Number(args.X1);
-  const y1 = Number(args.Y1);
-  const x2 = Number(args.X2);
-  const y2 = Number(args.Y2);
-
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-```
+1. Add a block descriptor inside `getInfo()` → `blocks` array (see existing blocks for examples).
+2. Implement the corresponding method on `DictionariesPlus` (method name must match `opcode`).
+3. Add a menu entry to `menus` if the block requires a dropdown.
+4. Update `docs/example.md` with usage examples.
+5. Update the blocks table in `README.md`.
 
 ## Testing
 
-### Manual Testing
-
-1. Build: `npm run build`
-2. Load in TurboWarp
-3. Create test scripts with your blocks
-4. Verify results
-
-### Automated Testing
-
-Create test scripts to verify your logic works correctly:
+The project uses an automated test suite:
 
 ```bash
-npm run test
+npm test
 ```
 
-Edit the test section in `package.json` to run your tests.
+Please add or update tests whenever you change block behaviour.
+
+## Commit Messages
+
+Use short, descriptive messages in the imperative mood:
+
+```text
+Add filter-array block for nested key paths
+Fix prototype-pollution guard in resolvePath
+Update docs: array insertion examples
+```
 
 ## Release Checklist
 
-Before releasing a new version:
+Before a release is tagged:
 
 - [ ] Update `version` in `src/manifest.json`
-- [ ] Run `npm run lint` - no errors
-- [ ] Run `npm run build` - successfully builds
-- [ ] Test blocks in TurboWarp
-- [ ] Update README if needed
-- [ ] Create git tag: `git tag vX.X.X`
-- [ ] Push tag: `git push origin vX.X.X`
-- [ ] GitHub Actions creates release automatically
-
-## Troubleshooting
-
-### Block doesn't appear in editor?
-
-- Check browser console for errors
-- Verify block is defined in `getInfo()`
-- Ensure the extension class is instantiated and registered
-- Hard refresh TurboWarp (Ctrl+Shift+R)
-
-### Block doesn't work?
-
-- Run `npm run lint` to find syntax errors
-- Check browser console for runtime errors
-- Verify argument names match between definition and implementation
-
-### Build errors?
-
-- Run `npm run lint` to find issues
-- Check that all JavaScript files are valid
-- Ensure `manifest.json` is valid JSON
-
-## Resources
-
-- [Scratch Extension Protocol](https://en.scratch-wiki.info/wiki/Scratch_Extension_Protocol)
-- [TurboWarp Documentation](https://docs.turbowarp.org/)
-- [Scratch Developer](https://developer.scratch.mit.edu/)
-- [JavaScript Reference](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+- [ ] Run `npm run fullstack` — no errors
+- [ ] Run `npm test` — all tests pass
+- [ ] Update `docs/example.md` if behaviour changed
+- [ ] Update block tables in `README.md` if blocks were added/removed
 
 ## Questions?
 
-Refer to the main [README.md](README.md) for general information.
-Open an issue if you have questions or suggestions!
+Open an issue or start a discussion on GitHub.
