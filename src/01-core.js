@@ -126,8 +126,9 @@ const deepContains = (obj, target) => {
 };
 
 const deepFindPath = (obj, target, currentPath = '') => {
-  if (String(obj) === String(target)) return currentPath;
-  if (typeof obj === 'object' && obj !== null) {
+  if (typeof obj !== 'object' || obj === null) {
+    if (String(obj) === String(target)) return currentPath;
+  } else {
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         // Skip internal props
