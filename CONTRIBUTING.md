@@ -4,10 +4,10 @@ Thank you for your interest in contributing to **Dictionaries+**!
 
 ## Getting Started
 
-1. Fork and clone the repository:
+1. Fork the repository on GitHub, then clone your fork:
 
    ```bash
-   git clone https://github.com/kx1xixit/dictplus.git
+   git clone https://github.com/YOUR-USERNAME/dictplus.git
    cd dictplus
    npm install
    ```
@@ -63,7 +63,7 @@ Please add or update tests whenever you change block behaviour.
 
 Use short, descriptive messages in the imperative mood:
 
-```
+```text
 Add filter-array block for nested key paths
 Fix prototype-pollution guard in resolvePath
 Update docs: array insertion examples

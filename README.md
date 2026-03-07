@@ -57,7 +57,7 @@
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+ (tested on 20.x and 22.x)
 - npm
 - TurboWarp or Scratch 3.0+ environment
 
@@ -81,7 +81,7 @@ This creates `build/extension.js`.
 
 1. Go to [turbowarp.org](https://turbowarp.org)
 2. Click **Add Extension** → **Load Custom Extension**
-3. Upload or paste the path to `build/extension.js`
+3. Upload `build/extension.js`, or host it and paste its URL
 
 ## Development
 
@@ -97,7 +97,7 @@ This creates `build/extension.js`.
 
 ## Project Structure
 
-```
+```text
 src/
 ├── 01-core.js      ← All extension logic
 └── manifest.json   ← Extension metadata (name, id, version, …)
@@ -138,4 +138,4 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 
 ## License
 
-KXEC-1.1 — see [LICENSE](LICENSE) for details.
+See [LICENSE](LICENSE) for licensing details.

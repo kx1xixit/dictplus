@@ -4,7 +4,7 @@ Get up and running with the **Dictionaries+** TurboWarp extension in 5 minutes.
 
 ## Prerequisites
 
-- Node.js 18+ ([Download](https://nodejs.org/))
+- Node.js 20+ (tested on 20.x and 22.x) ([Download](https://nodejs.org/))
 - TurboWarp ([Link](https://turbowarp.org/)) or Scratch 3.0+
 
 ## Setup
@@ -32,27 +32,27 @@ npm run build
 
 ### Create a dictionary and set a value
 
-```
+```text
 dictionary [player]: load JSON {"name": "Alice", "score": 0}
 key [score] in [player]: set to [42]
 ```
 
 ### Read a value
 
-```
+```text
 key [score] from dictionary [player]   → 42
 ```
 
 ### Nested keys (dot notation)
 
-```
+```text
 dictionary [game]: load JSON {"player": {"hp": 100}}
 key [player.hp] from dictionary [game]   → 100
 ```
 
 ### Arrays
 
-```
+```text
 initialize [scores] as empty array
 push [10] to array [] in [scores]
 push [20] to array [] in [scores]
@@ -75,7 +75,7 @@ items of array [] in [scores] joined by [, ]  → "10, 20"
 ```bash
 # Update version in src/manifest.json, then:
 git tag v1.1.0
-git push origin main --tags
+git push origin v1.1.0
 ```
 
 → GitHub Actions will automatically create a release with `build/extension.js` as an asset.
